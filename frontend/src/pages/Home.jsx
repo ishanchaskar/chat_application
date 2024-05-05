@@ -10,7 +10,8 @@ import {
   Tab,
   TabPanel,
 } from '@chakra-ui/react';
-
+import Login from "../components/auth/Login";
+import Signup from "../components/auth/Signup";
 const Home = () => {
   return (
     <div className='App'>
@@ -37,10 +38,10 @@ const Home = () => {
           </TabList>
           <TabPanels>
             <TabPanel>
-              {/* <Login/> */}
+              <Login/>
             </TabPanel>
             <TabPanel>
-              {/* <Signup/> */}
+              <Signup/>
             </TabPanel>
           </TabPanels>
         </Tabs>

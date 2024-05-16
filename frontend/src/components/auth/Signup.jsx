@@ -1,4 +1,10 @@
 import React, { useState } from 'react'
+import { useToast } from '@chakra-ui/react'
+import {Cloudinary} from "@cloudinary/url-gen";
+
+// const App = () => {
+  
+// };
 import { Button, ButtonGroup, FormControl, FormLabel, Input, InputGroup, InputRightElement, VStack } from "@chakra-ui/react";
 const Signup = () => {
   const [name, setname] = useState();
@@ -7,10 +13,60 @@ const Signup = () => {
   const [confirmpassword, setconfirmpassword] = useState();
   const [pic, setpic] = useState();
   const [show, setshow] = useState(false);
-
+  const toast = useToast()
+  const [loading , setLoading] = useState(false);
   const handleClick = () => setshow(!show);
   const submitHandler = () => {}
-  const postDetails = () => {}
+
+  const cloudinary = new Cloudinary({
+    cloud_name: 'dcbtqsfki', // Replace with your actual Cloud Name
+    api_key: '583983898796181', // Replace with your actual API Key
+    api_secret: '50ZvOaVTas_JwDSg_3AuN-yvADo', // Replace with your actual API Secret
+  });
+
+
+  const postDetails = async (pics) => {
+    setLoading(true);
+    if(pics === undefined){
+      toast({
+        title: 'Please select an image',
+        status: "warning",
+        duration: 5000,
+        isClosable: true,
+        position: "bottom"
+      })
+      return 
+    }
+    if(pics.type === "image/jpeg" || pics.type === "image/png"){
+      const data = new FormData();
+      data.append("file" , pics)
+      data.append("upload_preset" , "chat_app")
+      data.append("cloud_name" , "dcbtqsfki")
+      fetch("cloudinary://583983898796181:50ZvOaVTas_JwDSg_3AuN-yvADo@dcbtqsfki" ,{
+        method: "POST",
+        body: data
+      }).then(res => res.json())
+      .then(data =>{
+        setpic(data.url.toString());
+        console.log(data.url.toString());
+        setLoading(false);
+      })
+      .catch(err =>{
+        console.log(err)
+        setLoading(false);
+      })
+    }else{
+      toast({
+        title:"please select an image",
+        status: "warning",
+        duration: 3000,
+        isClosable: true,
+        position: "bottom",
+      });
+      setLoading(false);
+      return;
+    }
+  }
   return (
   
     
@@ -81,7 +137,7 @@ const Signup = () => {
 width="100%"
 marginTop={15}
 onClick={submitHandler}
-
+isLoading={loading}
 >
 Signup
 </Button>

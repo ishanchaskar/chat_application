@@ -1,5 +1,6 @@
 const express = require("express");
 const userRoutes = require("./routes/userRoutes")
+const chatRoutes = require("./routes/chatRoutes")
 const {chats }=  require("./data/data")
 const dotenv = require("dotenv");
 const app = express();
@@ -10,6 +11,7 @@ app.get("/", (req, res) => {
     res.send("api is running");
 })
 app.use("/api/user" , userRoutes)
+app.use("/api/chats" , chatRoutes)
 
 app.use(notFound)
 app.use(errorHandler)

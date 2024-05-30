@@ -57,7 +57,11 @@ const allUsers = asyncHandler(async ( req, res) =>{
             {email: {$regex: req.query.search , $options: "i"}}
         ]
     } : {};
-    const user = await User.find(keyword)
+    if (!req.user || !req.user._id) {
+        res.status(401);
+        throw new Error("Not authorized, no user found");
+    }
+    const user = await User.find(keyword).find({_id : {$ne: req.user._id}})
     res.send(user)
 })
 module.exports = {registerUser , authUser , allUsers};

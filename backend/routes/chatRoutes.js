@@ -1,8 +1,8 @@
 const express = require('express');
 const {protect} = require("../middleware/authMiddleware")
 const router = express.Router();
-
-// router.post("/" , protect , accessChat)
+const {accessChat} = require("../controller/chatController")
+router.post("/" , protect , accessChat)
 // router.get("/" , protect , fetchChats)
 // router.post("/group" , protect , createGroupChat)
 // router.put("/rename" , protect , renameGroupChat)

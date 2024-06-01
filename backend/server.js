@@ -1,4 +1,5 @@
 const express = require("express");
+const {protect} = require("./middleware/authMiddleware")
 const userRoutes = require("./routes/userRoutes")
 const chatRoutes = require("./routes/chatRoutes")
 const {chats }=  require("./data/data")

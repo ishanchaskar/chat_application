@@ -1,3 +1,4 @@
+require('dotenv').config(); // Load environment variables
 const express = require("express");
 const {protect} = require("./middleware/authMiddleware")
 const userRoutes = require("./routes/userRoutes")
@@ -13,7 +14,7 @@ app.get("/", (req, res) => {
 })
 app.use("/api/user" , userRoutes)
 app.use("/api/chats" , chatRoutes)
-
+// console.log("JWT_SECRET_KEY:", process.env.JWT_SECRET_KEY);
 app.use(notFound)
 app.use(errorHandler)
 

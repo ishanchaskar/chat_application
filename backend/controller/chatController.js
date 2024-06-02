@@ -1,4 +1,6 @@
 const asyncHandler = require("express-async-handler")
+const Chat = require("../models/chatModel")
+const User = require("../models/userModel")
 require('dotenv').config(); // Load environment variables
 const accessChat =asyncHandler(async (req , res ) =>{
     const {userId} = req.body

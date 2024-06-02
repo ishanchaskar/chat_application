@@ -10,4 +10,4 @@ router.post("/" , protect , accessChat)
 // router.put("/groupadd" , protect , addtoGroup)
 
 
-module.exports =router
+module.exports = router

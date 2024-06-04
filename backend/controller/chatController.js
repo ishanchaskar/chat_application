@@ -62,26 +62,44 @@ try {
     throw new Error(error.message)
 }
 })
-const createGroupChat = asyncHandler(async(req, res) =>{
-    if(!req.body.users || !req.body.name){
-        res.status(400); // Changed status code to 400 for bad request
-        throw new Error("please fill all the fields");
-    }
-    var users = JSON.parse(req.body.users)
-    if(users.length < 2){
+const createGroupChat = asyncHandler(async (req, res) => {
+    if (!req.body.users || !req.body.name) {
         res.status(400);
-        throw new Error("group chat needs more than 2 members")
+        throw new Error("Please fill all the fields");
     }
-    users.push(req.user)
+
+    let users;
     try {
-        const GroupChat = await Chat.create({
+        users = JSON.parse(req.body.users);
+    } catch (error) {
+        res.status(400);
+        throw new Error("Users should be a valid JSON array");
+    }
+
+    if (users.length < 2) {
+        res.status(400);
+        throw new Error("Group chat needs more than 2 members");
+    }
+
+    users.push(req.user);
+
+    try {
+        const groupChat = await Chat.create({
             chatName: req.body.name,
             isGroupChat: true,
             users: users,
-            groupAdmin:req.user
-        })
+            groupAdmin: req.user
+        });
+
+        const fullGroupChat = await Chat.findOne({ _id: groupChat._id })
+            .populate("users", "-password")
+            .populate("groupAdmin", "-password");
+
+        res.status(201).json(fullGroupChat);
     } catch (error) {
-        res.send(error.message)
+        res.status(500);
+        throw new Error(error.message);
     }
-})
+});
+
 module.exports = { accessChat , fetchChats , createGroupChat};

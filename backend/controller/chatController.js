@@ -62,4 +62,26 @@ try {
     throw new Error(error.message)
 }
 })
-module.exports = { accessChat , fetchChats};
+const createGroupChat = asyncHandler(async(req, res) =>{
+    if(!req.body.users || !req.body.name){
+        res.status(400); // Changed status code to 400 for bad request
+        throw new Error("please fill all the fields");
+    }
+    var users = JSON.parse(req.body.users)
+    if(users.length < 2){
+        res.status(400);
+        throw new Error("group chat needs more than 2 members")
+    }
+    users.push(req.user)
+    try {
+        const GroupChat = await Chat.create({
+            chatName: req.body.name,
+            isGroupChat: true,
+            users: users,
+            groupAdmin:req.user
+        })
+    } catch (error) {
+        res.send(error.message)
+    }
+})
+module.exports = { accessChat , fetchChats , createGroupChat};

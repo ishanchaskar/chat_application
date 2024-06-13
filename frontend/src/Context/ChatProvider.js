@@ -8,12 +8,18 @@ const ChatProvider = ({ children }) => {
     const navigate = useNavigate();
 
     useEffect(() => {
-        const UserInfo = JSON.parse(localStorage.getItem('userInfo'));
-        setUser(UserInfo);
-        if (!UserInfo) {
+        try {
+            const UserInfo = JSON.parse(localStorage.getItem('userInfo'));
+            setUser(UserInfo);
+            if (!UserInfo) {
+                navigate('/');
+            }
+        } catch (error) {
+            console.error("Error parsing userInfo from localStorage:", error);
             navigate('/');
         }
-    }, [navigate]); // Added navigate to the dependency array
+    }, [navigate]);
+    
     
     return (
         <ChatContext.Provider value={{ user, setUser }}>

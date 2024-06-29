@@ -1,4 +1,4 @@
-import { Avatar, Box, Button, Drawer, DrawerContent, DrawerHeader, DrawerOverlay, Menu, MenuButton, MenuDivider, MenuItem, MenuList, Text, useDisclosure } from '@chakra-ui/react'
+import { Avatar, Box, Button, Drawer, DrawerContent, DrawerHeader, DrawerOverlay, Input, Menu, MenuButton, MenuDivider, MenuItem, MenuList, Text, useDisclosure, useToast } from '@chakra-ui/react'
 import React , {useState} from 'react'
 import { Tooltip } from '@chakra-ui/react'
 import {
@@ -6,15 +6,18 @@ import {
   DrawerFooter,
   DrawerCloseButton,
 } from '@chakra-ui/react'
+import ChatLoading from "../ChatLoading";
+import UserListItem from "../UserAvatar/UserListItem"
 import { useNavigate } from 'react-router-dom'
 import { BellIcon, ChevronDownIcon } from '@chakra-ui/icons'
 import { ChatState } from "../../Context/ChatProvider"; 
 import Profile from "./Profile";
+import axios from 'axios'
 function SideDrawer() {
-    const[Search , setSearch] = useState()
+    const[search , setsearch] = useState()
     const[searchResult , setSearchResult] = useState([])
     const { isOpen, onOpen, onClose } = useDisclosure()
-    const[Loading , setLoading] = useState(false)
+    const[loading , setLoading] = useState(false)
     const[loadingChat , setLoadingChat] = useState()
     const { user } = ChatState();
     const navigate = useNavigate()
@@ -22,6 +25,42 @@ function SideDrawer() {
     const Logout =() =>{
       localStorage.removeItem('userInfo');
       navigate('/')
+    }
+const toast = useToast();
+    const handleSearch = async () => {
+      if(!search){
+        toast({
+          title:"Please Enter Something valid in search",
+          status: "warning",
+          duration : 5000,
+          isClosable: true,
+          position :"top-left"
+        })
+      }
+
+      try {
+        setLoading(true)
+        const config = {
+          headers: {
+            Authorization: `Bearer ${user.token}`
+          },
+        }
+        const {data} = await axios.get(`/api/user?search=${search}` , config)
+        setLoading(false)
+        setSearchResult(data)
+      } catch (error) {
+        toast({
+          title:"Failed to load the results",
+          status: "warning",
+          duration : 5000,
+          isClosable: true,
+          position :"bottom-left"
+        })
+      }
+    }
+
+    const accessChat = async(userId) => {
+
     }
   return (
     <>
@@ -68,6 +107,24 @@ function SideDrawer() {
       <DrawerOverlay/>
       <DrawerContent>
         <DrawerHeader borderBottomWidth="1px">Search Users</DrawerHeader>
+      <DrawerBody>
+        <Box display="flex" pb="2px">
+          <Input placeholder='search name or email' mr={2} value={search} onChange={(e) => setsearch(e.target.value)}/>
+          <Button onClick={handleSearch}>Go</Button>
+        </Box>
+        {loading ? (
+          <ChatLoading/>
+        ) : (
+          searchResult?.map(user => (
+            <UserListItem
+            key={user._id}
+            user={user}
+            handleFunction={()=>accessChat(user._id)}
+            />
+          ))
+        )
+        }
+      </DrawerBody>
       </DrawerContent>
     </Drawer>
     </>

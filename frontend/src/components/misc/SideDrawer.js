@@ -116,7 +116,7 @@ function SideDrawer() {
 
           <Menu>
             <MenuButton as={Button} rightIcon={<ChevronDownIcon />}>
-              <Avatar fontSize='sm' cursor='pointer' name={user.name} src={user.pic} />
+              <Avatar fontSize="xx-small" cursor='pointer' name={user.name} src={user.pic} />
             </MenuButton>
             <MenuList>
               <Profile user={user}>

@@ -3,7 +3,7 @@ import {ChatState} from "../../Context/ChatProvider"
 import { Avatar, Box, Text } from '@chakra-ui/react';
 const UserListItem = ({handleFunction , user}) => {
   return (
-    <Box onClick={{handleFunction}} cursor="pointer" bg="E8E8E8" _hover={{background:"blue", color:"white"}}
+    <Box onClick={handleFunction} cursor="pointer" bg="E8E8E8" _hover={{background:"blue", color:"white"}}
     w="100%" display="flex" alignItems="center" justifyContent="center" color="black" px={3} py={2} mb={2}  borderRadius="lg"
     >
         <Avatar mr={2} size="sm" cursor="pointer" name={user.name} src={user.pic}/>

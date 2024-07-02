@@ -4,6 +4,7 @@ import { Box, Button, Stack, Text, useToast } from '@chakra-ui/react';
 import axios from 'axios';
 import { AddIcon } from '@chakra-ui/icons';
 import ChatLoading from "../ChatLoading";
+import {getSender} from "../../config/ChatLogic"
 
 function MyChats() {
   const [loggedUser, setLoggedUser] = useState();

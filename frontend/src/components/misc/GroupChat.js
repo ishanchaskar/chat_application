@@ -1,4 +1,5 @@
 import {
+  Box,
   Button,
   FormControl,
   Input,
@@ -18,7 +19,7 @@ import {
 import UserListItem from "../../components/UserAvatar/UserListItem";
 import { ChatState } from "../../Context/ChatProvider";
 import axios from "axios";
-
+import UserBadgeItem from "../../components/UserAvatar/UserBadgeItem"
 const GroupChat = ({ children }) => {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [groupChatName, setGroupChatName] = useState('');
@@ -39,7 +40,8 @@ const GroupChat = ({ children }) => {
       });
       return;
     }
-    setSelectedUser(...selectedUser , userToAdd)
+    setSelectedUser([...selectedUser, userToAdd]);
+
 
   };
 
@@ -72,10 +74,14 @@ const GroupChat = ({ children }) => {
     }
   };
 
-  const handleSubmit = () => {
-    setLoading(true);
-    // Handle form submission
+  const handleSubmit = async () => {
+    if(!selectedUser || !groupChatName){
+      
+    }
   };
+  const handleDelete = (deletedUser) =>{
+    setSelectedUser(selectedUser.filter(sel=> sel._id !== deletedUser._id));
+  }
 
   const { user, chats, setChats } = ChatState();
 
@@ -110,23 +116,25 @@ const GroupChat = ({ children }) => {
                 onChange={(e) => handleSearch(e.target.value)}
               />
             </FormControl>
+<Box display="flex" flexWrap="wrap">
 
             {selectedUser.map((u) => (
-              <UserBadgeItem key={user._id} user={user}/>
+              <UserBadgeItem key={user._id} user={u} handleFunction = {() => handleDelete(u)} />
             ))}
             {loading ? (
               <div>Loading...</div>
             ) : (
               searchResult
-                ?.slice(0, 4)
-                .map((user) => (
-                  <UserListItem
-                    key={user._id}
-                    user={user}
-                    handleFunction={() => handleGroup(user)}
-                  />
-                ))
+              ?.slice(0, 4)
+              .map((user) => (
+                <UserListItem
+                key={user._id}
+                user={user}
+                handleFunction={() => handleGroup(user)}
+                />
+              ))
             )}
+            </Box>
           </ModalBody>
 
           <ModalFooter>

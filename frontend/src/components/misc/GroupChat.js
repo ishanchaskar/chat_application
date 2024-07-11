@@ -19,7 +19,8 @@ import {
 import UserListItem from "../../components/UserAvatar/UserListItem";
 import { ChatState } from "../../Context/ChatProvider";
 import axios from "axios";
-import UserBadgeItem from "../../components/UserAvatar/UserBadgeItem"
+import UserBadgeItem from "../../components/UserAvatar/UserBadgeItem";
+
 const GroupChat = ({ children }) => {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [groupChatName, setGroupChatName] = useState('');
@@ -29,8 +30,10 @@ const GroupChat = ({ children }) => {
   const [loading, setLoading] = useState(false);
   const toast = useToast();
 
+  const { user, chats, setChats } = ChatState();
+
   const handleGroup = async (userToAdd) => {
-    if(selectedUser.includes(userToAdd)){
+    if (selectedUser.includes(userToAdd)) {
       toast({
         title: "User already added",
         status: "warning",
@@ -41,8 +44,6 @@ const GroupChat = ({ children }) => {
       return;
     }
     setSelectedUser([...selectedUser, userToAdd]);
-
-
   };
 
   const handleSearch = async (query) => {
@@ -62,6 +63,7 @@ const GroupChat = ({ children }) => {
       setLoading(false);
       setSearchResult(data);
     } catch (error) {
+      console.error("Error occurred during search:", error);
       toast({
         title: "Error occurred",
         description: "Failed to load search results",
@@ -75,15 +77,23 @@ const GroupChat = ({ children }) => {
   };
 
   const handleSubmit = async () => {
-    if(!selectedUser || !groupChatName){
-      
+    if (!selectedUser || !groupChatName) {
+      toast({
+        title: "Please fill all fields",
+        status: "warning",
+        duration: 3000,
+        isClosable: true,
+        position: "top",
+      });
+      return;
     }
-  };
-  const handleDelete = (deletedUser) =>{
-    setSelectedUser(selectedUser.filter(sel=> sel._id !== deletedUser._id));
-  }
 
-  const { user, chats, setChats } = ChatState();
+    // Add logic to submit group chat creation
+  };
+
+  const handleDelete = (deletedUser) => {
+    setSelectedUser(selectedUser.filter((sel) => sel._id !== deletedUser._id));
+  };
 
   return (
     <>
@@ -116,24 +126,27 @@ const GroupChat = ({ children }) => {
                 onChange={(e) => handleSearch(e.target.value)}
               />
             </FormControl>
-<Box display="flex" flexWrap="wrap">
-
-            {selectedUser.map((u) => (
-              <UserBadgeItem key={user._id} user={u} handleFunction = {() => handleDelete(u)} />
-            ))}
-            {loading ? (
-              <div>Loading...</div>
-            ) : (
-              searchResult
-              ?.slice(0, 4)
-              .map((user) => (
-                <UserListItem
-                key={user._id}
-                user={user}
-                handleFunction={() => handleGroup(user)}
+            <Box display="flex" flexWrap="wrap">
+              {selectedUser.map((u) => (
+                <UserBadgeItem
+                  key={u._id}
+                  user={u}
+                  handleFunction={() => handleDelete(u)}
                 />
-              ))
-            )}
+              ))}
+              {loading ? (
+                <div>Loading...</div>
+              ) : (
+                searchResult
+                  ?.slice(0, 4)
+                  .map((user) => (
+                    <UserListItem
+                      key={user._id}
+                      user={user}
+                      handleFunction={() => handleGroup(user)}
+                    />
+                  ))
+              )}
             </Box>
           </ModalBody>
 

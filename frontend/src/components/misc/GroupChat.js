@@ -75,9 +75,10 @@ const GroupChat = ({ children }) => {
       setLoading(false);
     }
   };
+  
 
   const handleSubmit = async () => {
-    if (!selectedUser || !groupChatName) {
+    if (!selectedUser.length || !groupChatName) {
       toast({
         title: "Please fill all fields",
         status: "warning",
@@ -87,9 +88,37 @@ const GroupChat = ({ children }) => {
       });
       return;
     }
-
-    // Add logic to submit group chat creation
+    try {
+      const config = {
+        headers: {
+          Authorization: `Bearer ${user.token}`,
+        },
+      };
+      const { data } = await axios.post(`/api/chat/group`, {
+        name: groupChatName,
+        users: JSON.stringify(selectedUser.map((u) => u._id)),
+      }, config);
+      setChats([data, ...chats]);
+      onClose();
+      toast({
+        title: "New group chat created",
+        duration: 2000,
+        isClosable: true,
+        status: "success",
+        position: "bottom",
+      });
+    } catch (error) {
+      console.error("Group chat creation error:", error);
+      toast({
+        title: "Group creation failed",
+        description: error.response?.data?.message || "An error occurred",
+        duration: 2000,
+        position: "bottom",
+        status: "error",
+      });
+    }
   };
+  
 
   const handleDelete = (deletedUser) => {
     setSelectedUser(selectedUser.filter((sel) => sel._id !== deletedUser._id));

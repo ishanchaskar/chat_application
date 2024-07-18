@@ -3,10 +3,11 @@ import { ChatState } from "../Context/ChatProvider";
 import SideDrawer from "../components/misc/SideDrawer"; 
 import ChatBox from "../components/misc/ChatBox"; 
 import MyChats from "../components/misc/MyChats";
+import { useState } from "react";
 
 const Chats = () => {
   const { user } = ChatState();
-
+const[fetchAgain , setfetchAgain] = useState(false)
   return (
     <div style={{ width: "100%" }}>
       {user && <SideDrawer />}
@@ -17,8 +18,8 @@ const Chats = () => {
         height="91.5vh"  // Changed from h to height
         padding="10px"  // Changed from p to padding
       >
-        {user && <MyChats />}
-        {user && <ChatBox />}
+        {user && <MyChats fetchAgain = {fetchAgain}/>}
+        {user && <ChatBox fetchAgain = {fetchAgain}/>}
       </Box>
     </div>
   );

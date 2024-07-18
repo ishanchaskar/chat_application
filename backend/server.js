@@ -1,28 +1,25 @@
-require('dotenv').config(); // Load environment variables
+require('dotenv').config();
 const express = require("express");
-const {protect} = require("./middleware/authMiddleware")
-const userRoutes = require("./routes/userRoutes")
-const chatRoutes = require("./routes/chatRoutes")
-const {chats }=  require("./data/data")
-const dotenv = require("dotenv");
+const { protect } = require("./middleware/authMiddleware");
+const userRoutes = require("./routes/userRoutes");
+const chatRoutes = require("./routes/chatRoutes");
+const connectDb = require("./config/db");
+const { notFound, errorHandler } = require("./middleware/errorMiddleware");
+
 const app = express();
-const {notFound , errorHandler} = require("./middleware/errorMiddleware")
-app.use(express.json())
-const connectDb = require("./config/db")
+connectDb();
+
+app.use(express.json());
+
 app.get("/", (req, res) => {
-    res.send("api is running");
-})
-app.use("/api/user" , userRoutes)
-app.use("/api/chats" , chatRoutes)
-// console.log("JWT_SECRET_KEY:", process.env.JWT_SECRET_KEY);
-app.use(notFound)
-app.use(errorHandler)
+  res.send("API is running");
+});
 
-dotenv.config();
-connectDb()
+app.use("/api/user", userRoutes);
+app.use("/api/chat", chatRoutes); // Fixed route
 
-const PORT = process.env.PORT || 5000
+app.use(notFound);
+app.use(errorHandler);
 
-
-
-app.listen(PORT , console.log(`server listening on port ${PORT}`));
+const PORT = process.env.PORT || 5000;
+app.listen(PORT, () => console.log(`Server running on port ${PORT}`));

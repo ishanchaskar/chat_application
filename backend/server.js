@@ -1,6 +1,7 @@
 require('dotenv').config();
 const express = require("express");
 const { protect } = require("./middleware/authMiddleware");
+const cors = require('cors');
 const userRoutes = require("./routes/userRoutes");
 const chatRoutes = require("./routes/chatRoutes");
 const connectDb = require("./config/db");
@@ -10,13 +11,14 @@ const app = express();
 connectDb();
 
 app.use(express.json());
+app.use(cors());
 
 app.get("/", (req, res) => {
   res.send("API is running");
 });
 
 app.use("/api/user", userRoutes);
-app.use("/api/chat", chatRoutes); // Fixed route
+app.use("/api/chats", chatRoutes);
 
 app.use(notFound);
 app.use(errorHandler);

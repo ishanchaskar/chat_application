@@ -12,6 +12,7 @@ import {
   import {ChatState} from "../../Context/ChatProvider";
 import { ViewIcon } from '@chakra-ui/icons'
 import UserBadgeItem from '../UserAvatar/UserBadgeItem';
+import axios from 'axios';
 const UpdateGroupChatModal = () => {
     const { user, setSelectedChat, selectedChat } = ChatState();
     const { isOpen, onOpen, onClose } = useDisclosure()
@@ -21,7 +22,20 @@ const UpdateGroupChatModal = () => {
     const [loading, setloading] = useState(false)
     const [renameLoading, setrenameLoading] = useState(false)
     const toast = useToast();
-    const handleRename = () => {};
+    const handleRename =async () => {
+      if(!groupChatName ) return
+      try {
+        setrenameLoading(true)
+        const config = {
+          headers: {
+            Authorization : `Bearer ${user.token}`
+          },
+        }
+        const {data} = await axios.put("http://localhost:5000/api/chats/rename" , {chatId : selectedChat._id , chatName : groupChatName } , config);
+      } catch (error) {
+        
+      }
+    };
     const handleSearch = () => {};
     
     const handleRemove = () => {};
@@ -80,10 +94,9 @@ const UpdateGroupChatModal = () => {
     </ModalBody>
 
     <ModalFooter>
-      <Button colorScheme='blue' mr={3} onClick={onClose}>
-        Close
+      <Button colorScheme='red'  onClick={() => handleRemove(user)}>
+        Leave Group
       </Button>
-      <Button variant='ghost'>Secondary Action</Button>
     </ModalFooter>
   </ModalContent>
 </Modal>

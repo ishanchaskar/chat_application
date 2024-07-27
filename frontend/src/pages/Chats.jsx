@@ -19,7 +19,7 @@ const[fetchAgain , setfetchAgain] = useState(false)
         padding="10px"  // Changed from p to padding
       >
         {user && <MyChats fetchAgain = {fetchAgain}/>}
-        {user && <ChatBox fetchAgain = {fetchAgain}/>}
+        {user && <ChatBox fetchAgain = {fetchAgain} setfetchAgain={setfetchAgain} />}
       </Box>
     </div>
   );

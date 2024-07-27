@@ -11,7 +11,7 @@ const {selectedChat} = ChatState();
     flexDir="column"
     p={3}
     bg="white"
-    w={{base : "100%" , md:"68ज्ञ"}}
+    w={{base : "100%" , md:"68"}}
     borderRadius="lg"
     borderWidth="1px"
     ><SingleChats fetchAgain = {fetchAgain} setfetchAgain = {setfetchAgain}/></Box>

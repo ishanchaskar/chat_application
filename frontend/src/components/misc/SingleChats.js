@@ -1,6 +1,6 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { ChatState } from '../../Context/ChatProvider';
-import { Box, IconButton, Text } from '@chakra-ui/react';
+import { Box, FormControl, IconButton, Input, Spinner, Text } from '@chakra-ui/react';
 import { ArrowBackIcon } from '@chakra-ui/icons';
 import { getSender , getSenderFull } from '../../config/ChatLogic';
 import Profile from './Profile';
@@ -8,6 +8,13 @@ import UpdateGroupChatModal from './UpdateGroupChatModal';
 
 const SingleChats = ({ fetchAgain, setfetchAgain }) => {
   const { user, setSelectedChat, selectedChat } = ChatState();
+  const [messages , setmessages] = useState([])
+  const [loading, setloading] = useState(false);
+  const [newmessage, setnewmessage] = useState([]);
+const sendMessage =() =>{}
+const typingHandler =(e) =>{
+  setnewmessage(e.target.value)
+}
 
   return (
     <>
@@ -54,8 +61,20 @@ const SingleChats = ({ fetchAgain, setfetchAgain }) => {
           borderRadius="lg"
           overflow="hidden"
           >
-
-            {/* Messages Here */}
+            {loading ? (
+              <Spinner
+              alignSelf='center'
+              size='xl'
+              w={20}
+              h={20}
+              margin='auto'
+              />
+            ) : (
+              <div>Messages here</div>
+            )}
+            <FormControl onKeyDown={sendMessage} isRequired mt={3}>
+              <Input bg="#E0E0E0" placeholder='enter message here..' variant="filled" onChange={typingHandler} value={newmessage}/>
+            </FormControl>
           </Box>
         </>
       ) : (

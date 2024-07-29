@@ -20,7 +20,7 @@ function MyChats({ fetchAgain }) {
         },
       };
       const { data } = await axios.get("/api/chats", config);
-      console.log(data);
+      // console.log(data);
       setChats(data);
     } catch (error) {
       toast({

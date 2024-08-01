@@ -8,11 +8,17 @@ import UpdateGroupChatModal from './UpdateGroupChatModal';
 import axios from 'axios';
 import "./styles.css"
 import ScrollableChat from './ScrollableChat';
+import io from "socket.io-client"
+
+const ENDPOINT = "http://localhost:5000";
+var socket , selectedChatCompare;
+
 const SingleChats = ({ fetchAgain, setfetchAgain }) => {
   const { user, setSelectedChat, selectedChat } = ChatState();
   const [messages , setmessages] = useState([])
   const [loading, setloading] = useState(false);
   const [newmessage, setnewmessage] = useState([]);
+  const [socketConnected, setsocketConnected] = useState(false);
   const toast = useToast();
 const sendMessage =async (event) =>{
   if(event.key === "Enter" && newmessage){
@@ -43,6 +49,14 @@ const sendMessage =async (event) =>{
     }
   }
 }
+
+
+useEffect(() => {
+  socket = io(ENDPOINT);
+  socket.emit("setup" , user)
+  socket.on("connection" , () => setsocketConnected(true))
+}, []);
+
 const fetchMessage = async () => {
   if(!selectedChat) return
   try {
@@ -56,7 +70,8 @@ const fetchMessage = async () => {
     const {data} = await axios.get(`http://localhost:5000/api/message/${selectedChat._id}` , config)
     setmessages(data)
     setloading(false)
-    console.log(messages)
+
+    socket.emit("join chat" , selectedChat._id)
   } catch (error) {
     toast({
       title: "Error Occured",
@@ -71,6 +86,7 @@ const fetchMessage = async () => {
 }
 useEffect(() => {
   fetchMessage()
+  selectedChatCompare = selectedChat
 }, [selectedChat]);
 const typingHandler =(e) =>{
   setnewmessage(e.target.value)

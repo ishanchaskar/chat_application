@@ -8,7 +8,10 @@ import UpdateGroupChatModal from './UpdateGroupChatModal';
 import axios from 'axios';
 import "./styles.css"
 import ScrollableChat from './ScrollableChat';
+import Lottie from 'react-lottie';
 import io from "socket.io-client";
+import { loop } from '@cloudinary/url-gen/actions/effect';
+import animationData from "../../animations/typing.json"
 
 const ENDPOINT = "http://localhost:5000";
 let socket, selectedChatCompare;
@@ -22,6 +25,15 @@ const SingleChats = ({ fetchAgain, setfetchAgain }) => {
   const [typing, setTyping] = useState(false);
   const [isTyping, setIsTyping] = useState(false);
   const toast = useToast();
+
+const defaultOptions = {
+  loop:true,
+  autoplay: true,
+  animationData : animationData,
+  rendererSettings: {
+    preserveAspectRatio: 'xMildYMid slice'
+  }
+}
 
   const sendMessage = async (event) => {
     if (event.key === "Enter" && newMessage) {
@@ -175,7 +187,11 @@ const SingleChats = ({ fetchAgain, setfetchAgain }) => {
               </div>
             )}
             <FormControl onKeyDown={sendMessage} isRequired mt={3}>
-              {isTyping ? <div>loading....</div> : <></>}
+              {isTyping ? <div> <Lottie
+              options={defaultOptions}
+              width={70}
+              style={{marginBottom : 15 , marginLeft: 0}}
+              /> </div> : <></>}
               <Input
                 bg="#E0E0E0"
                 placeholder='Enter message here...'

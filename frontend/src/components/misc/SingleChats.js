@@ -8,103 +8,118 @@ import UpdateGroupChatModal from './UpdateGroupChatModal';
 import axios from 'axios';
 import "./styles.css"
 import ScrollableChat from './ScrollableChat';
-import io from "socket.io-client"
+import io from "socket.io-client";
 
 const ENDPOINT = "http://localhost:5000";
-var socket , selectedChatCompare;
+let socket, selectedChatCompare;
 
 const SingleChats = ({ fetchAgain, setfetchAgain }) => {
   const { user, setSelectedChat, selectedChat } = ChatState();
-  const [messages , setmessages] = useState([])
-  const [loading, setloading] = useState(false);
-  const [newmessage, setnewmessage] = useState([]);
-  const [socketConnected, setsocketConnected] = useState(false);
-  const [typing, settyping] = useState(false);
-  const [istyping, setistyping] = useState(false);
+  const [messages, setMessages] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [newMessage, setNewMessage] = useState("");
+  const [socketConnected, setSocketConnected] = useState(false);
+  const [typing, setTyping] = useState(false);
+  const [isTyping, setIsTyping] = useState(false);
   const toast = useToast();
-const sendMessage =async (event) =>{
-  if(event.key === "Enter" && newmessage){
-    try {
-      const config = 
-      {
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${user.token}`,
-        }
+
+  const sendMessage = async (event) => {
+    if (event.key === "Enter" && newMessage) {
+      socket.emit('stop typing', selectedChat._id);
+      try {
+        const config = {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${user.token}`,
+          },
+        };
+        setNewMessage("");
+        const { data } = await axios.post("http://localhost:5000/api/message", {
+          content: newMessage,
+          chatId: selectedChat._id
+        }, config);
+        socket.emit("new message", data);
+        setMessages([...messages, data]);
+      } catch (error) {
+        toast({
+          title: "Error Occurred",
+          description: "Failed to send the message",
+          status: "error",
+          duration: 5000,
+          isClosable: true,
+          position: "bottom",
+        });
       }
-      setnewmessage("")
-      const {data} =  await axios.post("http://localhost:5000/api/message/" , {
-        content : newmessage,
-        chatId: selectedChat._id
-      }, config)
-      console.log(data)
-      socket.emit("new message" , data)
-      setmessages([...messages , data])
+    }
+  };
+
+  useEffect(() => {
+    socket = io(ENDPOINT);
+    socket.emit("setup", user);
+    socket.on("connected", () => setSocketConnected(true));
+    socket.on("typing", () => setIsTyping(true));
+    socket.on("stop typing", () => setIsTyping(false));
+  }, []);
+
+  const fetchMessages = async () => {
+    if (!selectedChat) return;
+    try {
+      const config = {
+        headers: {
+          Authorization: `Bearer ${user.token}`,
+        },
+      };
+      setLoading(true);
+      const { data } = await axios.get(`http://localhost:5000/api/message/${selectedChat._id}`, config);
+      setMessages(data);
+      setLoading(false);
+      socket.emit("join chat", selectedChat._id);
     } catch (error) {
       toast({
-        title: "Error Occured",
-        description: "Failed to send the message",
+        title: "Error Occurred",
+        description: "Failed to load the messages",
         status: "error",
         duration: 5000,
         isClosable: true,
         position: "bottom",
       });
     }
-  }
-}
+  };
 
+  useEffect(() => {
+    fetchMessages();
+    selectedChatCompare = selectedChat;
+  }, [selectedChat]);
 
-useEffect(() => {
-  socket = io(ENDPOINT);
-  socket.emit("setup" , user)
-  socket.on("connection" , () => setsocketConnected(true))
-}, []);
-
-const fetchMessage = async () => {
-  if(!selectedChat) return
-  try {
-    const config = 
-    {
-      headers: {
-        Authorization: `Bearer ${user.token}`,
+  useEffect(() => {
+    socket.on("message received", (newMessageReceived) => {
+      if (!selectedChatCompare || selectedChatCompare._id !== newMessageReceived.chat._id) {
+        // give notification
+      } else {
+        setMessages([...messages, newMessageReceived]);
       }
-    }
-    setloading(true)
-    const {data} = await axios.get(`http://localhost:5000/api/message/${selectedChat._id}` , config)
-    setmessages(data)
-    setloading(false)
-
-    socket.emit("join chat" , selectedChat._id)
-  } catch (error) {
-    toast({
-      title: "Error Occured",
-      description: "Failed to send the message",
-      status: "error",
-      duration: 5000,
-      isClosable: true,
-      position: "bottom",
     });
-  }
+  });
 
-}
-useEffect(() => {
-  fetchMessage()
-  selectedChatCompare = selectedChat
-}, [selectedChat]);
+  const typingHandler = (e) => {
+    setNewMessage(e.target.value);
+    if (!socketConnected) return;
 
-useEffect(() => {
- socket.on("message recieved" , (newMessageRecieved) => {
-  if(!selectedChatCompare || selectedChatCompare._id !== newMessageRecieved.chat._id){
-    // give noti
-  }else{
-    setmessages([...messages , newMessageRecieved])
-  }
- }) 
-});
-
-const typingHandler =(e) =>{
-  setnewmessage(e.target.value)
-}
+    if (!typing) {
+      setTyping(true);
+      socket.emit("typing", selectedChat._id);
+    }
+    let lastTypingTime = new Date().getTime();
+    const timerLength = 3000;
+    setTimeout(() => {
+      const timeNow = new Date().getTime();
+      const timeDiff = timeNow - lastTypingTime;
+      if (timeDiff >= timerLength && typing) {
+        socket.emit('stop typing', selectedChat._id);
+        setTyping(false);
+      }
+    }, timerLength);
+  };
 
   return (
     <>
@@ -128,7 +143,7 @@ const typingHandler =(e) =>{
             {!selectedChat.isGroupChat ? (
               <>
                 {getSender(user, selectedChat.users)}
-                <Profile user ={ getSenderFull(user , selectedChat.users)}/>
+                <Profile user={getSenderFull(user, selectedChat.users)} />
               </>
             ) : (
               <>
@@ -136,44 +151,45 @@ const typingHandler =(e) =>{
                 <UpdateGroupChatModal
                   fetchAgain={fetchAgain}
                   setfetchAgain={setfetchAgain}
-                  fetchMessage = {fetchMessage}
+                  fetchMessages={fetchMessages}
                 />
               </>
             )}
           </Text>
-          <Box 
-          display="flex"
-          flexDir="column"
-          justifyContent="flex-end"
-          p={3}
-          bg="#E8E8E8"
-          w="100%"
-          h="100%"
-          borderRadius="lg"
-          overflow="hidden"
+          <Box
+            display="flex"
+            flexDir="column"
+            justifyContent="flex-end"
+            p={3}
+            bg="#E8E8E8"
+            w="100%"
+            h="100%"
+            borderRadius="lg"
+            overflowY="hidden"
           >
             {loading ? (
-              <Spinner
-              alignSelf='center'
-              size='xl'
-              w={20}
-              h={20}
-              margin='auto'
-              />
+              <Spinner alignSelf='center' size='xl' w={20} h={20} margin='auto' />
             ) : (
               <div className='messages'>
-                <ScrollableChat messages={messages}/>
+                <ScrollableChat messages={messages} />
               </div>
             )}
             <FormControl onKeyDown={sendMessage} isRequired mt={3}>
-              <Input bg="#E0E0E0" placeholder='enter message here..' variant="filled" onChange={typingHandler} value={newmessage}/>
+              {isTyping ? <div>loading....</div> : <></>}
+              <Input
+                bg="#E0E0E0"
+                placeholder='Enter message here...'
+                variant="filled"
+                onChange={typingHandler}
+                value={newMessage}
+              />
             </FormControl>
           </Box>
         </>
       ) : (
         <Box display="flex" alignItems="center" justifyContent="center" h="100%">
           <Text fontSize="2xl" pb={3} fontFamily="sans-serif">
-            Click on a user to start
+            Click on a user to start chatting
           </Text>
         </Box>
       )}
@@ -182,4 +198,3 @@ const typingHandler =(e) =>{
 };
 
 export default SingleChats;
-

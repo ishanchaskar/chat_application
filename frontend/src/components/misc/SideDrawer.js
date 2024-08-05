@@ -1,7 +1,26 @@
 import React, { useState } from 'react';
 import {
-  Avatar, Box, Button, Drawer, DrawerContent, DrawerHeader, DrawerOverlay, Input, Menu, MenuButton, MenuDivider, MenuItem, MenuList, Spinner, Text, useDisclosure, useToast, Tooltip,
-  DrawerBody, DrawerCloseButton
+  Badge,
+  Avatar,
+  Box,
+  Button,
+  Drawer,
+  DrawerContent,
+  DrawerHeader,
+  DrawerOverlay,
+  Input,
+  Menu,
+  MenuButton,
+  MenuDivider,
+  MenuItem,
+  MenuList,
+  Spinner,
+  Text,
+  useDisclosure,
+  useToast,
+  Tooltip,
+  DrawerBody,
+  DrawerCloseButton,
 } from '@chakra-ui/react';
 import { useNavigate } from 'react-router-dom';
 import { BellIcon, ChevronDownIcon } from '@chakra-ui/icons';
@@ -10,6 +29,7 @@ import UserListItem from "../UserAvatar/UserListItem";
 import { ChatState } from "../../Context/ChatProvider";
 import Profile from "./Profile";
 import axios from 'axios';
+import { getSender } from '../../config/ChatLogic';
 
 function SideDrawer() {
   const [search, setSearch] = useState('');
@@ -17,7 +37,7 @@ function SideDrawer() {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [loading, setLoading] = useState(false);
   const [loadingChat, setLoadingChat] = useState(false);
-  const { user, setSelectedChat, chats, setChats } = ChatState();
+  const { user, setSelectedChat, chats, setChats, notifications, setnotifications } = ChatState();
   const navigate = useNavigate();
   const toast = useToast();
 
@@ -33,7 +53,7 @@ function SideDrawer() {
         status: "warning",
         duration: 5000,
         isClosable: true,
-        position: "top-left"
+        position: "top-left",
       });
       return;
     }
@@ -42,7 +62,7 @@ function SideDrawer() {
       setLoading(true);
       const config = {
         headers: {
-          Authorization: `Bearer ${user.token}`
+          Authorization: `Bearer ${user.token}`,
         },
       };
       const { data } = await axios.get(`/api/user?search=${search}`, config);
@@ -54,7 +74,7 @@ function SideDrawer() {
         status: "warning",
         duration: 5000,
         isClosable: true,
-        position: "bottom-left"
+        position: "bottom-left",
       });
       setLoading(false);
     }
@@ -66,7 +86,7 @@ function SideDrawer() {
       const config = {
         headers: {
           "Content-type": "application/json",
-          Authorization: `Bearer ${user.token}`
+          Authorization: `Bearer ${user.token}`,
         },
       };
       const { data } = await axios.post("/api/chats", { userId }, config);
@@ -82,7 +102,7 @@ function SideDrawer() {
         status: "error",
         duration: 5000,
         isClosable: true,
-        position: "bottom-left"
+        position: "bottom-left",
       });
       setLoadingChat(false);
     }
@@ -108,10 +128,38 @@ function SideDrawer() {
         <Text fontSize='2xl' fontFamily='cursive'>TALk-a-tive</Text>
         <div>
           <Menu>
-            <MenuButton p={1}>
-              <BellIcon fontSize='2xl' m={1} />
-            </MenuButton>
-            {/* <MenuList></MenuList> */}
+            <Box position="relative" display="inline-block" mx={3}>
+              <MenuButton p={1}>
+                <BellIcon fontSize="2xl" m={1} />
+                {notifications.length > 0 && (
+                  <Badge
+                    colorScheme="red"
+                    borderRadius="full"
+                    position="absolute"
+                    top="0"
+                    right="0"
+                    transform="translate(50%, -50%)"
+                  >
+                    {notifications.length}
+                  </Badge>
+                )}
+              </MenuButton>
+            </Box>
+            <MenuList pl={2}>
+              {!notifications.length && "No New Messages"}
+              {notifications.map((not) => (
+                <MenuItem key={not._id}
+                  onClick={() => {
+                    setSelectedChat(not.chat);
+                    setnotifications(notifications.filter((n) => n !== not));
+                  }}
+                >
+                  {not.chat.isGroupChat 
+                    ? `New Message In ${not.chat.chatName}` 
+                    : `New message from ${getSender(user, not.chat.users)}`}
+                </MenuItem>
+              ))}
+            </MenuList>
           </Menu>
 
           <Menu>
@@ -120,10 +168,10 @@ function SideDrawer() {
             </MenuButton>
             <MenuList>
               <Profile user={user}>
-                <MenuItem>My Profile </MenuItem>
+                <MenuItem>My Profile</MenuItem>
               </Profile>
               <MenuDivider />
-              <MenuItem onClick={Logout}>Logout </MenuItem>
+              <MenuItem onClick={Logout}>Logout</MenuItem>
             </MenuList>
           </Menu>
         </div>

@@ -50,7 +50,7 @@ const Profile = ({ user, children }) => {
                             alt={user.name}
                         />
                         <Text
-                            fontSize={{ base: "28px", md: "30px" }}
+                            fontSize={{ base: "20px", md: "20px" }}
                             fontFamily="Work sans"
                         >
                             {user.email}

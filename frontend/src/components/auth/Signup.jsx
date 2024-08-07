@@ -189,7 +189,7 @@ const Signup =  () => {
         </FormLabel>
       </FormControl>
       
-      <Button colorScheme='blue'
+      <Button colorscheme='blue'
         width="100%"
         marginTop={15}
         onClick={submitHandler}

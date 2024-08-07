@@ -133,7 +133,7 @@ function SideDrawer() {
                 <BellIcon fontSize="2xl" m={1} />
                 {notifications.length > 0 && (
                   <Badge
-                    colorScheme="red"
+                    colorscheme="red"
                     borderRadius="full"
                     position="absolute"
                     top="0"

@@ -87,7 +87,7 @@ function Login() {
       </FormControl>
 
       <Button
-        colorScheme="blue"
+        colorscheme="blue"
         width="100%"
         mt={4}
         onClick={submitHandler}
@@ -96,7 +96,7 @@ function Login() {
         Login
       </Button>
       <Button
-        colorScheme="red"
+        colorscheme="red"
         variant="solid"
         width="100%"
         mt={4}

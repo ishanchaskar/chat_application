@@ -6,34 +6,29 @@ const chatRoutes = require("./routes/chatRoutes");
 const connectDb = require("./config/db");
 const { notFound, errorHandler } = require("./middleware/errorMiddleware");
 const messageRoutes = require("./routes/messageRoutes");
-const path = require("path")
+const path = require("path");
 const app = express();
+
 connectDb();
 
 app.use(express.json());
 app.use(cors());
 
-
-
 app.use("/api/user", userRoutes);
 app.use("/api/message", messageRoutes);
 app.use("/api/chats", chatRoutes);
 
-
-
 const __dirname1 = path.resolve();
-if(process.env.NODE_ENV === "production"){
-  app.use(express.static(path.join(__dirname1 , "/frontend/build")))
-  app.get('*' , (req,res) =>{
-    res.sendFile(path.resolve(__dirname1 , "frontend" , "build" , "index.html"))
-  })
-}else{
+if (process.env.NODE_ENV === "production") {
+  app.use(express.static(path.join(__dirname1, "/frontend/build")));
+  app.get('*', (req, res) => {
+    res.sendFile(path.resolve(__dirname1, "frontend", "build", "index.html"));
+  });
+} else {
   app.get("/", (req, res) => {
     res.send("API is running");
   });
-
 }
-
 
 app.use(notFound);
 app.use(errorHandler);
@@ -41,11 +36,13 @@ app.use(errorHandler);
 const PORT = process.env.PORT || 5000;
 const server = app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
 
-// Corrected socket.io setup
 const io = require("socket.io")(server, {
   pingTimeout: 60000,
   cors: {
-    origin: "http://localhost:3000"
+    origin: process.env.NODE_ENV === "production" ? "https://connect-u0kp.onrender.com" : "http://localhost:3000",
+    methods: ["GET", "POST"],
+    allowedHeaders: ["Authorization"],
+    credentials: true
   }
 });
 
@@ -74,8 +71,9 @@ io.on("connection", (socket) => {
       socket.in(user._id).emit("message received", newMessageReceived);
     });
   });
-  socket.off("setup" , () =>{
-    console.log("user disconnected")
-      socket.leave(userData._id)
-  })
+
+  socket.off("setup", () => {
+    console.log("user disconnected");
+    socket.leave(userData._id);
+  });
 });
